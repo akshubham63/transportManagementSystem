@@ -48,6 +48,5 @@ public class TransportRequest {
     private Date createdAt = new Date();
 
     @LastModifiedDate
-    @Column(nullable = false)
     private Date updatedAt;
 }
