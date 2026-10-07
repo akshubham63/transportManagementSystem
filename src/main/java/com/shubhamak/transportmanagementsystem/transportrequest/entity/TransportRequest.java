@@ -1,0 +1,48 @@
+package com.shubhamak.transportmanagementsystem.transportrequest.entity;
+
+import com.shubhamak.transportmanagementsystem.transportrequest.enums.TransportRequestStatus;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
+
+import java.util.Date;
+import java.util.UUID;
+
+@Entity
+public class TransportRequest {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(nullable = false, unique = true)
+    @Size(max = 64)
+    private String requestNumber;
+
+    @Column(nullable = false)
+    @Size(max = 64)
+    private String source;
+
+    @Column(nullable = false)
+    private String destination;
+
+    @Column(nullable = false)
+    private String material;
+
+    @Column(nullable = false)
+    private Double quantity;
+
+    @Column(nullable = false)
+    @Max(99)
+    @Min(1)
+    private Integer priority;
+
+    @Column(nullable = false)
+    private TransportRequestStatus status = TransportRequestStatus.CREATED;
+
+    @Column(nullable = false)
+    private Date createdAt;
+
+    @Column(nullable = false)
+    private Date updatedAt;
+}
