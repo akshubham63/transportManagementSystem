@@ -1,6 +1,6 @@
-package com.shubhamak.transportmanagementsystem.transportrequest.repository;
+package com.shubham.tms.transportrequest.repository;
 
-import com.shubhamak.transportmanagementsystem.transportrequest.entity.TransportRequest;
+import com.shubham.tms.transportrequest.entity.TransportRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

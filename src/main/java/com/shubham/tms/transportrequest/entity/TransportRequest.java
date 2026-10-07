@@ -1,10 +1,12 @@
-package com.shubhamak.transportmanagementsystem.transportrequest.entity;
+package com.shubham.tms.transportrequest.entity;
 
-import com.shubhamak.transportmanagementsystem.transportrequest.enums.TransportRequestStatus;
+import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 import java.util.UUID;
@@ -37,12 +39,14 @@ public class TransportRequest {
     @Min(1)
     private Integer priority;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransportRequestStatus status = TransportRequestStatus.CREATED;
 
+    @CreatedDate
     @Column(nullable = false)
-    private Date createdAt;
+    private Date createdAt = new Date();
 
-    @Column(nullable = false)
+    @LastModifiedDate
     private Date updatedAt;
 }

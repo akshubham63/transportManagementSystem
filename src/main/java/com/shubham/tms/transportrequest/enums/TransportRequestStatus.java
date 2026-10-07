@@ -1,4 +1,4 @@
-package com.shubhamak.transportmanagementsystem.transportrequest.enums;
+package com.shubham.tms.transportrequest.enums;
 
 public enum TransportRequestStatus {
     CREATED,
