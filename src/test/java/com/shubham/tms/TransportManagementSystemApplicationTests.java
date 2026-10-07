@@ -1,4 +1,4 @@
-package com.shubhamak.transportmanagementsystem;
+package com.shubham.tms;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

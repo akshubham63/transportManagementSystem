@@ -1,6 +1,6 @@
-package com.shubhamak.transportmanagementsystem.transportrequest.entity;
+package com.shubham.tms.transportrequest.entity;
 
-import com.shubhamak.transportmanagementsystem.transportrequest.enums.TransportRequestStatus;
+import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
