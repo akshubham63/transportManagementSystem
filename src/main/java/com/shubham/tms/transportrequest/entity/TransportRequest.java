@@ -79,9 +79,4 @@ public class TransportRequest {
         this.requestNumber = "TR-" + timePart + "-" + randomTail;
         // Example Result: TR-20261008-204115-7482
     }
-
-    @PostUpdate
-    public void preUpdateActions() {
-        this.updatedAt = new Date();
-    }
 }

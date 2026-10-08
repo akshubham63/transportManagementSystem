@@ -26,7 +26,7 @@ public class TransportRequestResponseDto {
 
     private TransportRequestStatus status;
 
-    private Date createdAt = new Date();
+    private Date createdAt;
 
     private Date updatedAt;
 
