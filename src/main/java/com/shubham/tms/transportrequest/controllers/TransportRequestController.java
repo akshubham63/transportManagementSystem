@@ -6,6 +6,8 @@ import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.service.TransportRequestService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,15 +28,15 @@ public class TransportRequestController {
 
     @PostMapping
     public ResponseEntity<TransportRequestResponseDto> createTransportRequest(@Valid @RequestBody TransportRequestBodyDto transportRequestBodyDto){
-        TransportRequestResponseDto transportRequest = transportRequestService.saveTransportRequest(transportRequestBodyDto);
+        TransportRequestResponseDto transportRequestResponseDto = transportRequestService.saveTransportRequest(transportRequestBodyDto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(transportRequest);
+                .body(transportRequestResponseDto);
     }
 
     @GetMapping
     public ResponseEntity<GetApiResponse<TransportRequestResponseDto>> getAllTransportRequest(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page index must be 0 or greater") int page,
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 1000, message = "Limit must be less than or equal to 1000") int limit
     ) {
         GetApiResponse<TransportRequestResponseDto> allTransportRequest = transportRequestService.getAllTransportRequest(page, limit);
         return ResponseEntity.ok(allTransportRequest);
@@ -42,7 +44,7 @@ public class TransportRequestController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TransportRequestResponseDto> getTransportRequestById(@PathVariable("id") UUID id) {
-        TransportRequestResponseDto transportRequestById = transportRequestService.getTransportRequestById(id);
-        return ResponseEntity.ok(transportRequestById);
+        TransportRequestResponseDto transportRequestResponseById = transportRequestService.getTransportRequestById(id);
+        return ResponseEntity.ok(transportRequestResponseById);
     }
 }

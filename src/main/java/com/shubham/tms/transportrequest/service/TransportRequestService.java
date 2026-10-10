@@ -4,6 +4,7 @@ import com.shubham.tms.transportrequest.dto.GetApiResponse;
 import com.shubham.tms.transportrequest.dto.TransportRequestBodyDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
+import com.shubham.tms.transportrequest.exceptions.IllegalArgumentException;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestNotFoundException;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,8 @@ public class TransportRequestService {
     }
 
     public GetApiResponse<TransportRequestResponseDto> getAllTransportRequest(int page, int limit) {
+        if (page < 0) throw new IllegalArgumentException("Page number should be positive integer");
+        if (limit <= 0 || limit > 1000) throw new IllegalArgumentException("Limit should be greater than zero and less than 1000");
         Pageable pageable = PageRequest.of(page, limit);
         Page<TransportRequest> transportRequestList = transportRequestRepository.findAll(pageable);
         List<TransportRequestResponseDto> transportRequestResponseDtoList = transportRequestList.stream()
