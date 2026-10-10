@@ -36,7 +36,7 @@ public class TransportRequestController {
     @GetMapping
     public ResponseEntity<GetApiResponse<TransportRequestResponseDto>> getAllTransportRequest(
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page index must be 0 or greater") int page,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 1000, message = "Limit must be less than or equal to 1000") int limit
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 100, message = "Limit must be less than or equal to 100") int limit
     ) {
         GetApiResponse<TransportRequestResponseDto> allTransportRequest = transportRequestService.getAllTransportRequest(page, limit);
         return ResponseEntity.ok(allTransportRequest);
