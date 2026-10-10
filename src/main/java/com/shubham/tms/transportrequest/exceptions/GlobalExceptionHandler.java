@@ -1,5 +1,6 @@
 package com.shubham.tms.transportrequest.exceptions;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -30,6 +31,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TransportRequestNotFoundException.class)
     public ResponseEntity<?> handleTransportResponseNotFound(TransportRequestNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(java.lang.IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(java.lang.IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getMessage()));
     }
 }

@@ -36,8 +36,6 @@ public class TransportRequestService {
     }
 
     public GetApiResponse<TransportRequestResponseDto> getAllTransportRequest(int page, int limit) {
-        if (page < 0) throw new IllegalArgumentException("Page number should be positive integer");
-        if (limit <= 0 || limit > 1000) throw new IllegalArgumentException("Limit should be greater than zero and less than 1000");
         Pageable pageable = PageRequest.of(page, limit);
         Page<TransportRequest> transportRequestList = transportRequestRepository.findAll(pageable);
         List<TransportRequestResponseDto> transportRequestResponseDtoList = transportRequestList.stream()
