@@ -25,7 +25,6 @@ public class TransportRequestService {
 
     public TransportRequestResponseDto saveTransportRequest(TransportRequestBodyDto transportRequestBodyDto) {
         TransportRequest transportRequest = TransportRequest.builder()
-                .createdAt(new Date())
                 .destination(transportRequestBodyDto.getDestination())
                 .material(transportRequestBodyDto.getMaterial())
                 .priority(transportRequestBodyDto.getPriority())
