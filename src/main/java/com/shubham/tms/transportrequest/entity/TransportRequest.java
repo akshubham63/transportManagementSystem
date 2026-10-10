@@ -58,10 +58,9 @@ public class TransportRequest {
     @Column(nullable = false)
     private TransportRequestStatus status = TransportRequestStatus.CREATED;
 
-    @Builder.Default
     @CreatedDate
     @Column(nullable = false)
-    private Date createdAt = new Date();
+    private Date createdAt;
 
     @LastModifiedDate
     private Date updatedAt;
