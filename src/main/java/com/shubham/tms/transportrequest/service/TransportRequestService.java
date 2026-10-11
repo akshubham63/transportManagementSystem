@@ -74,6 +74,9 @@ public class TransportRequestService {
     public void deleteTransportRequest(UUID id) {
         TransportRequest transportRequest = transportRequestRepository.findById(id)
                 .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
+        if(!transportRequest.getStatus().equals(TransportRequestStatus.CREATED)) {
+            throw new TransportRequestStatusException("Transport request with id: " + id + " is under process and cannot be updated!!!");
+        }
         transportRequestRepository.delete(transportRequest);
     }
 }
