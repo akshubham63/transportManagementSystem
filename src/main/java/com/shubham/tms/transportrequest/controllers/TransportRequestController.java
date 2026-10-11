@@ -57,4 +57,12 @@ public class TransportRequestController {
         TransportRequestResponseDto transportRequestResponseDto = transportRequestService.updateTransportRequestById(id, transportRequestBodyDto);
         return ResponseEntity.ok(transportRequestResponseDto);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTransportRequest(
+            @PathVariable("id") UUID id
+    ) {
+        transportRequestService.deleteTransportRequest(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -70,4 +70,10 @@ public class TransportRequestService {
         TransportRequest updatedTransportRequest = transportRequestRepository.save(transportRequest);
         return TransportRequestResponseDto.fromEntity(updatedTransportRequest);
     }
+
+    public void deleteTransportRequest(UUID id) {
+        TransportRequest transportRequest = transportRequestRepository.findById(id)
+                .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
+        transportRequestRepository.delete(transportRequest);
+    }
 }
