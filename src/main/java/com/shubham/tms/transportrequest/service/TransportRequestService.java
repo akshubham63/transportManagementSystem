@@ -4,7 +4,9 @@ import com.shubham.tms.transportrequest.dto.GetApiResponse;
 import com.shubham.tms.transportrequest.dto.TransportRequestBodyDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
+import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestNotFoundException;
+import com.shubham.tms.transportrequest.exceptions.TransportRequestStatusException;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -51,5 +53,20 @@ public class TransportRequestService {
         TransportRequest transportRequest = transportRequestRepository.findById(id)
                 .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
         return TransportRequestResponseDto.fromEntity(transportRequest);
+    }
+
+    public TransportRequestResponseDto updateTransportRequestById(UUID id, TransportRequestBodyDto transportRequestBodyDto) {
+        TransportRequest transportRequest = transportRequestRepository.findById(id)
+                .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
+        if(!transportRequest.getStatus().equals(TransportRequestStatus.CREATED)) {
+            throw new TransportRequestStatusException("Transport request with id: " + id + " is under process and cannot be updated!!!");
+        }
+        transportRequest.setDestination(transportRequestBodyDto.getDestination());
+        transportRequest.setPriority(transportRequestBodyDto.getPriority());
+        transportRequest.setMaterial(transportRequestBodyDto.getMaterial());
+        transportRequest.setQuantity(transportRequestBodyDto.getQuantity());
+
+        TransportRequest updatedTransportRequest = transportRequestRepository.save(transportRequest);
+        return TransportRequestResponseDto.fromEntity(updatedTransportRequest);
     }
 }
