@@ -49,4 +49,12 @@ public class TransportRequestController {
         TransportRequestResponseDto transportRequestResponseById = transportRequestService.getTransportRequestById(id);
         return ResponseEntity.ok(transportRequestResponseById);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TransportRequestResponseDto> updateTransportRequest(
+            @PathVariable("id") UUID id,
+            @Valid @RequestBody TransportRequestBodyDto transportRequestBodyDto) {
+        TransportRequestResponseDto transportRequestResponseDto = transportRequestService.updateTransportRequestById(id, transportRequestBodyDto);
+        return ResponseEntity.ok(transportRequestResponseDto);
+    }
 }

@@ -58,16 +58,16 @@ public class TransportRequest {
     @Column(nullable = false)
     private TransportRequestStatus status = TransportRequestStatus.CREATED;
 
-    @Builder.Default
     @CreatedDate
     @Column(nullable = false)
-    private Date createdAt = new Date();
+    private Date createdAt;
 
     @LastModifiedDate
     private Date updatedAt;
 
     @PrePersist
-    public void generateRequestNumber() {
+    private void generateRequestNumber() {
+        setCreatedAt(new Date());
         // 1. Get the current date and time format down to the millisecond/second
         String timePart = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
@@ -78,5 +78,10 @@ public class TransportRequest {
 
         this.requestNumber = "TR-" + timePart + "-" + randomTail;
         // Example Result: TR-20261008-204115-7482
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        setUpdatedAt(new Date());
     }
 }
