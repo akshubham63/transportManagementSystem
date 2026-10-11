@@ -34,8 +34,11 @@ public class TransportRequestController {
     }
 
     @PostMapping
-    public ResponseEntity<TransportRequestResponseDto> createTransportRequest(@Valid @RequestBody TransportRequestBodyDto transportRequestBodyDto){
-        TransportRequestResponseDto transportRequestResponseDto = transportRequestService.saveTransportRequest(transportRequestBodyDto);
+    public ResponseEntity<TransportRequestResponseDto> createTransportRequest(
+            @Valid @RequestBody TransportRequestBodyDto transportRequestBodyDto,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey
+    ){
+        TransportRequestResponseDto transportRequestResponseDto = transportRequestService.saveTransportRequest(transportRequestBodyDto, idempotencyKey);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(transportRequestResponseDto);
     }

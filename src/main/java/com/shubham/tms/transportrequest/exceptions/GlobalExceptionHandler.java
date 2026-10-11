@@ -1,6 +1,7 @@
 package com.shubham.tms.transportrequest.exceptions;
 
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -50,5 +51,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTransportRequestStatusException(TransportRequestStatusException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation (DataIntegrityViolationException ex) {
+        String message = "A conflict occurred. This request may have already been processed.";
+        ErrorResponse error = new ErrorResponse(message);
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 }
