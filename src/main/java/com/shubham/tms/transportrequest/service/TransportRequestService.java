@@ -36,7 +36,8 @@ public class TransportRequestService {
             TransportRequestBodyDto transportRequestBodyDto,
             String idempotencyKey
     ) {
-        if(idempotencyKey != null && transportRequestRepository.existsByIdempotencyKey(idempotencyKey)) {
+        String normalizedKey = idempotencyKey == null || idempotencyKey.isBlank() ? null : idempotencyKey.trim();
+        if(normalizedKey != null && transportRequestRepository.existsByIdempotencyKey(normalizedKey)) {
             throw new DuplicateIdempotencyKeyException("Duplicate idempotency key detected.");
         }
 
@@ -46,15 +47,13 @@ public class TransportRequestService {
                 .priority(transportRequestBodyDto.getPriority())
                 .quantity(transportRequestBodyDto.getQuantity())
                 .source(transportRequestBodyDto.getSource())
+                .idempotencyKey(normalizedKey)
                 .build();
-        if(idempotencyKey != null && !idempotencyKey.isBlank()) {
-            transportRequest.setIdempotencyKey(idempotencyKey);
-        }
 
         try {
             TransportRequest savedTransportRequest = transportRequestRepository.save(transportRequest);
             return TransportRequestResponseDto.fromEntity(savedTransportRequest);
-        } catch (DuplicateIdempotencyKeyException ex) {
+        } catch (DataIntegrityViolationException ex) {
             throw new DuplicateIdempotencyKeyException("Duplicate submission detected during concurrent processing.");
         }
     }
