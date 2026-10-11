@@ -4,6 +4,7 @@ import com.shubham.tms.transportrequest.dto.GetApiResponse;
 import com.shubham.tms.transportrequest.dto.TransportRequestBodyDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
+import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestNotFoundException;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestStatusException;
@@ -11,11 +12,15 @@ import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class TransportRequestService {
@@ -36,9 +41,16 @@ public class TransportRequestService {
         return TransportRequestResponseDto.fromEntity(transportRequestRepository.save(transportRequest));
     }
 
-    public GetApiResponse<TransportRequestResponseDto> getAllTransportRequest(int page, int limit) {
-        Pageable pageable = PageRequest.of(page, limit);
-        Page<TransportRequest> transportRequestList = transportRequestRepository.findAll(pageable);
+    public GetApiResponse<TransportRequestResponseDto> getAllTransportRequest(
+            Integer page, Integer limit, TransportRequestStatus status, Integer priority, String source, String destination, String material, Double quantity, Date createdAt, Date updatedAt, SortDirection sortDirection, String sortBy
+    ) {
+        Sort sort = Sort.by(
+                sortDirection != null && sortDirection.equals(SortDirection.DESC)? Sort.Direction.DESC : Sort.Direction.ASC,
+                sortBy != null ? sortBy : "createdAt"
+        );
+        Specification<TransportRequest> spec = buildSpecification(status, priority, source, destination, material, quantity, createdAt, updatedAt);
+        Pageable pageable = PageRequest.of(page, limit, sort);
+        Page<TransportRequest> transportRequestList = transportRequestRepository.findAll(spec, pageable);
         List<TransportRequestResponseDto> transportRequestResponseDtoList = transportRequestList.stream()
                 .map(TransportRequestResponseDto::fromEntity)
                 .toList();
@@ -78,5 +90,42 @@ public class TransportRequestService {
             throw new TransportRequestStatusException("Transport request with id: " + id + " is under process and cannot be updated!!!");
         }
         transportRequestRepository.delete(transportRequest);
+    }
+
+    private Specification<TransportRequest> buildSpecification(
+            TransportRequestStatus status, Integer priority, String source, String destination, String material, Double quantity, Date createdAt, Date updatedAt
+    ) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(source != null) {
+                predicates.add(criteriaBuilder.equal(root.get("source"), source));
+            }
+            if(destination != null) {
+                predicates.add(criteriaBuilder.equal(root.get("destination"), destination));
+            }
+            if(material != null) {
+                predicates.add(criteriaBuilder.equal(root.get("material"), material));
+            }
+            if(quantity != null) {
+                predicates.add(criteriaBuilder.equal(root.get("quantity"), quantity));
+            }
+            if(createdAt != null) {
+                predicates.add(criteriaBuilder.equal(root.get("createdAt"), createdAt));
+            }
+            if(updatedAt != null) {
+                predicates.add(criteriaBuilder.equal(root.get("updatedAt"), updatedAt));
+            }
+
+            if(status != null) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+
+            if(priority != null) {
+                predicates.add(criteriaBuilder.equal(root.get("priority"), priority));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
     }
 }
