@@ -16,15 +16,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
 import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class TransportRequestService {
     public final TransportRequestRepository transportRequestRepository;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "source", "destination", "material", "quantity", "createdAt", "updatedAt"
+    );
 
     public TransportRequestService(TransportRequestRepository transportRequestRepository) {
         this.transportRequestRepository = transportRequestRepository;
@@ -46,7 +47,7 @@ public class TransportRequestService {
     ) {
         Sort sort = Sort.by(
                 sortDirection != null && sortDirection.equals(SortDirection.DESC)? Sort.Direction.DESC : Sort.Direction.ASC,
-                sortBy != null ? sortBy : "createdAt"
+                sortBy != null && ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "createdAt"
         );
         Specification<TransportRequest> spec = buildSpecification(status, priority, source, destination, material, quantity, createdAt, updatedAt);
         Pageable pageable = PageRequest.of(page, limit, sort);

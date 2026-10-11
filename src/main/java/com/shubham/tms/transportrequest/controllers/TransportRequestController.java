@@ -20,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -44,7 +45,7 @@ public class TransportRequestController {
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page index must be 0 or greater") Integer page,
             @RequestParam(defaultValue = "10") @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 100, message = "Limit must be less than or equal to 100") Integer limit,
             @RequestParam(required = false) TransportRequestStatus status,
-            @RequestParam(required = false) @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 100, message = "Limit must be less than or equal to 99") Integer priority,
+            @RequestParam(required = false) @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 99, message = "Limit must be less than or equal to 99") Integer priority,
             @RequestParam(required = false) String source,
             @RequestParam(required = false) String destination,
             @RequestParam(required = false) String material,
