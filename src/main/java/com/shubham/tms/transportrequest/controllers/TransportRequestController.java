@@ -50,7 +50,7 @@ public class TransportRequestController {
         return ResponseEntity.ok(transportRequestResponseById);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<TransportRequestResponseDto> updateTransportRequest(
             @PathVariable("id") UUID id,
             @Valid @RequestBody TransportRequestBodyDto transportRequestBodyDto) {

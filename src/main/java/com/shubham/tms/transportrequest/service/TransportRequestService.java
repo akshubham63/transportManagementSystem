@@ -65,6 +65,7 @@ public class TransportRequestService {
         transportRequest.setPriority(transportRequestBodyDto.getPriority());
         transportRequest.setMaterial(transportRequestBodyDto.getMaterial());
         transportRequest.setQuantity(transportRequestBodyDto.getQuantity());
+        transportRequest.setSource(transportRequestBodyDto.getSource());
 
         TransportRequest updatedTransportRequest = transportRequestRepository.save(transportRequest);
         return TransportRequestResponseDto.fromEntity(updatedTransportRequest);
