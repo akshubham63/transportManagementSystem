@@ -6,6 +6,7 @@ import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
+import com.shubham.tms.transportrequest.exceptions.DuplicateIdempotencyKeyException;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestNotFoundException;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestStatusException;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
@@ -36,7 +37,7 @@ public class TransportRequestService {
             String idempotencyKey
     ) {
         if(idempotencyKey != null && transportRequestRepository.existsByIdempotencyKey(idempotencyKey)) {
-            throw new DataIntegrityViolationException("Duplicate idempotency key detected.");
+            throw new DuplicateIdempotencyKeyException("Duplicate idempotency key detected.");
         }
 
         TransportRequest transportRequest = TransportRequest.builder()
@@ -53,8 +54,8 @@ public class TransportRequestService {
         try {
             TransportRequest savedTransportRequest = transportRequestRepository.save(transportRequest);
             return TransportRequestResponseDto.fromEntity(savedTransportRequest);
-        } catch (DataIntegrityViolationException ex) {
-            throw new DataIntegrityViolationException("Duplicate submission detected during concurrent processing.");
+        } catch (DuplicateIdempotencyKeyException ex) {
+            throw new DuplicateIdempotencyKeyException("Duplicate submission detected during concurrent processing.");
         }
     }
 
