@@ -6,9 +6,11 @@ import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
+import com.shubham.tms.transportrequest.exceptions.DuplicateIdempotencyKeyException;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestNotFoundException;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestStatusException;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,15 +32,30 @@ public class TransportRequestService {
         this.transportRequestRepository = transportRequestRepository;
     }
 
-    public TransportRequestResponseDto saveTransportRequest(TransportRequestBodyDto transportRequestBodyDto) {
+    public TransportRequestResponseDto saveTransportRequest(
+            TransportRequestBodyDto transportRequestBodyDto,
+            String idempotencyKey
+    ) {
+        String normalizedKey = idempotencyKey == null || idempotencyKey.isBlank() ? null : idempotencyKey.trim();
+        if(normalizedKey != null && transportRequestRepository.existsByIdempotencyKey(normalizedKey)) {
+            throw new DuplicateIdempotencyKeyException("Duplicate idempotency key detected.");
+        }
+
         TransportRequest transportRequest = TransportRequest.builder()
                 .destination(transportRequestBodyDto.getDestination())
                 .material(transportRequestBodyDto.getMaterial())
                 .priority(transportRequestBodyDto.getPriority())
                 .quantity(transportRequestBodyDto.getQuantity())
                 .source(transportRequestBodyDto.getSource())
+                .idempotencyKey(normalizedKey)
                 .build();
-        return TransportRequestResponseDto.fromEntity(transportRequestRepository.save(transportRequest));
+
+        try {
+            TransportRequest savedTransportRequest = transportRequestRepository.save(transportRequest);
+            return TransportRequestResponseDto.fromEntity(savedTransportRequest);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateIdempotencyKeyException("Duplicate submission detected during concurrent processing.");
+        }
     }
 
     public GetApiResponse<TransportRequestResponseDto> getAllTransportRequest(

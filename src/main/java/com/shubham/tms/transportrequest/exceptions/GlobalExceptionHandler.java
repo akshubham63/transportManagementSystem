@@ -51,4 +51,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getMessage()));
     }
+
+    @ExceptionHandler(DuplicateIdempotencyKeyException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation (DuplicateIdempotencyKeyException ex) {
+        String message = "A conflict occurred. This request may have already been processed.";
+        ErrorResponse error = new ErrorResponse(message);
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
 }

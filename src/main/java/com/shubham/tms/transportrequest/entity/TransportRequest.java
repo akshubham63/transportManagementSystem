@@ -65,6 +65,9 @@ public class TransportRequest {
     @LastModifiedDate
     private Date updatedAt;
 
+    @Column(name = "idempotency_key", unique = true, nullable = true)
+    private String idempotencyKey;
+
     @PrePersist
     private void generateRequestNumber() {
         setCreatedAt(new Date());
