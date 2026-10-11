@@ -17,7 +17,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-
 import jakarta.persistence.criteria.Predicate;
 
 @Service
@@ -45,9 +44,18 @@ public class TransportRequestService {
     public GetApiResponse<TransportRequestResponseDto> getAllTransportRequest(
             Integer page, Integer limit, TransportRequestStatus status, Integer priority, String source, String destination, String material, Double quantity, Date createdAt, Date updatedAt, SortDirection sortDirection, String sortBy
     ) {
+        String finalSortBy;
+        if(sortBy == null) {
+            finalSortBy = "createdAt";
+        } else if (ALLOWED_SORT_FIELDS.contains(sortBy)) {
+            finalSortBy = sortBy;
+        } else {
+            throw new IllegalArgumentException("Invalid sort field: '" + sortBy +
+                    "'. Allowed fields are: " + ALLOWED_SORT_FIELDS);
+        }
         Sort sort = Sort.by(
                 sortDirection != null && sortDirection.equals(SortDirection.DESC)? Sort.Direction.DESC : Sort.Direction.ASC,
-                sortBy != null && ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "createdAt"
+                finalSortBy
         );
         Specification<TransportRequest> spec = buildSpecification(status, priority, source, destination, material, quantity, createdAt, updatedAt);
         Pageable pageable = PageRequest.of(page, limit, sort);
