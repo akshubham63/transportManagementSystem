@@ -1,8 +1,11 @@
 package com.shubham.tms.transportrequest.exceptions;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -57,5 +60,36 @@ public class GlobalExceptionHandler {
         String message = "A conflict occurred. This request may have already been processed.";
         ErrorResponse error = new ErrorResponse(message);
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex) {
+
+        if (isInvalidTransportRequestStatus(ex)) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid transport request status")
+            );
+        }
+
+        return ResponseEntity.badRequest().body(
+                new ErrorResponse("Malformed JSON request body")
+        );
+    }
+
+    private boolean isInvalidTransportRequestStatus(Throwable ex) {
+        Throwable cause = ex;
+
+        while (cause != null) {
+            if (cause instanceof InvalidFormatException invalidFormatException) {
+                return invalidFormatException.getTargetType()
+                        .equals(TransportRequestStatus.class);
+            }
+
+            cause = cause.getCause();
+        }
+
+        return false;
     }
 }

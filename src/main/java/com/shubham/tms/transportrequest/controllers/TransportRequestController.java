@@ -3,11 +3,10 @@ package com.shubham.tms.transportrequest.controllers;
 import com.shubham.tms.transportrequest.dto.GetApiResponse;
 import com.shubham.tms.transportrequest.dto.TransportRequestBodyDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
-import com.shubham.tms.transportrequest.entity.TransportRequest;
+import com.shubham.tms.transportrequest.dto.TransportRequestStatusUpdateDto;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
 import com.shubham.tms.transportrequest.service.TransportRequestService;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -15,12 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -84,5 +79,14 @@ public class TransportRequestController {
     ) {
         transportRequestService.deleteTransportRequest(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<TransportRequestResponseDto> updateTransportRequestStatus(
+            @PathVariable("id") UUID id,
+            @Valid @RequestBody TransportRequestStatusUpdateDto transportRequestStatusUpdateDto
+    ) {
+        TransportRequestResponseDto transportRequestResponseDto = transportRequestService.updateTransportRequestStatus(id, transportRequestStatusUpdateDto);
+        return ResponseEntity.ok(transportRequestResponseDto);
     }
 }

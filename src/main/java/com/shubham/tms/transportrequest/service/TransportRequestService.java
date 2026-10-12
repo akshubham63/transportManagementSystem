@@ -3,6 +3,7 @@ package com.shubham.tms.transportrequest.service;
 import com.shubham.tms.transportrequest.dto.GetApiResponse;
 import com.shubham.tms.transportrequest.dto.TransportRequestBodyDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
+import com.shubham.tms.transportrequest.dto.TransportRequestStatusUpdateDto;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
@@ -26,6 +27,19 @@ public class TransportRequestService {
     public final TransportRequestRepository transportRequestRepository;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "source", "destination", "material", "quantity", "createdAt", "updatedAt"
+    );
+
+    private static final Map<TransportRequestStatus, Set<TransportRequestStatus>> VALID_TRANSITIONS = Map.of(
+            TransportRequestStatus.CREATED, Set.of(
+                    TransportRequestStatus.APPROVED,
+                    TransportRequestStatus.REJECTED,
+                    TransportRequestStatus.CANCELLED
+            ),
+            TransportRequestStatus.APPROVED, Set.of(
+                    TransportRequestStatus.CANCELLED
+            ),
+            TransportRequestStatus.REJECTED, Set.of(),
+            TransportRequestStatus.CANCELLED, Set.of()
     );
 
     public TransportRequestService(TransportRequestRepository transportRequestRepository) {
@@ -116,6 +130,32 @@ public class TransportRequestService {
             throw new TransportRequestStatusException("Transport request with id: " + id + " is under process and cannot be updated!!!");
         }
         transportRequestRepository.delete(transportRequest);
+    }
+
+    public TransportRequestResponseDto updateTransportRequestStatus(UUID id, TransportRequestStatusUpdateDto transportRequestStatusUpdateDto) {
+        if(transportRequestStatusUpdateDto.getStatus().name().isEmpty()) {
+            throw new TransportRequestStatusException("Transport request status must not be null");
+        }
+        if(!TransportRequestStatus.isValid(transportRequestStatusUpdateDto.getStatus().name())) {
+            throw new TransportRequestStatusException("Invalid transport request status: " + transportRequestStatusUpdateDto.getStatus());
+        }
+
+        TransportRequest transportRequest = transportRequestRepository.findById(id)
+                .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
+
+        TransportRequestStatus currentStatus = transportRequest.getStatus();
+        TransportRequestStatus newStatus = transportRequestStatusUpdateDto.getStatus();
+
+        if (currentStatus == newStatus)
+            throw new TransportRequestStatusException("Transport request is already in status: " + transportRequest.getStatus());
+
+        Set<TransportRequestStatus> allowedTargets = VALID_TRANSITIONS.getOrDefault(currentStatus, Set.of());
+        if(!allowedTargets.contains(newStatus))
+            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
+
+        transportRequest.setStatus(newStatus);
+        TransportRequest savedTransportRequest = transportRequestRepository.save(transportRequest);
+        return TransportRequestResponseDto.fromEntity(savedTransportRequest);
     }
 
     private Specification<TransportRequest> buildSpecification(
