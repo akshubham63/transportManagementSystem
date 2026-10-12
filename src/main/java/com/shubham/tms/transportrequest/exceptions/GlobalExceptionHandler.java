@@ -1,5 +1,7 @@
 package com.shubham.tms.transportrequest.exceptions;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,15 +62,34 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        Map<String, String> errors = new HashMap<>();
-        if (ex.getMessage() != null && ex.getMessage().contains("TransportRequestStatus")) {
-            errors.put("status", "Invalid transport request status");
-        } else {
-            errors.put("error", "Malformed JSON request body");
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex) {
+
+        if (isInvalidTransportRequestStatus(ex)) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid transport request status")
+            );
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        return ResponseEntity.badRequest().body(
+                new ErrorResponse("Malformed JSON request body")
+        );
+    }
+
+    private boolean isInvalidTransportRequestStatus(Throwable ex) {
+        Throwable cause = ex;
+
+        while (cause != null) {
+            if (cause instanceof InvalidFormatException invalidFormatException) {
+                return invalidFormatException.getTargetType()
+                        .equals(TransportRequestStatus.class);
+            }
+
+            cause = cause.getCause();
+        }
+
+        return false;
     }
 }
