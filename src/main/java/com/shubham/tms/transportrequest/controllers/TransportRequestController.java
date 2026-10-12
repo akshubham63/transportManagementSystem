@@ -84,7 +84,7 @@ public class TransportRequestController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<TransportRequestResponseDto> updateTransportRequestStatus(
             @PathVariable("id") UUID id,
-            @RequestBody TransportRequestStatusUpdateDto transportRequestStatusUpdateDto
+            @Valid @RequestBody TransportRequestStatusUpdateDto transportRequestStatusUpdateDto
     ) {
         TransportRequestResponseDto transportRequestResponseDto = transportRequestService.updateTransportRequestStatus(id, transportRequestStatusUpdateDto);
         return ResponseEntity.ok(transportRequestResponseDto);

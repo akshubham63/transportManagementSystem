@@ -3,6 +3,7 @@ package com.shubham.tms.transportrequest.exceptions;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -57,5 +58,17 @@ public class GlobalExceptionHandler {
         String message = "A conflict occurred. This request may have already been processed.";
         ErrorResponse error = new ErrorResponse(message);
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        Map<String, String> errors = new HashMap<>();
+        if (ex.getMessage() != null && ex.getMessage().contains("TransportRequestStatus")) {
+            errors.put("status", "Invalid transport request status");
+        } else {
+            errors.put("error", "Malformed JSON request body");
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 }

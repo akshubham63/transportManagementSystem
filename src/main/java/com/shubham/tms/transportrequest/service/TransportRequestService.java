@@ -29,6 +29,19 @@ public class TransportRequestService {
             "source", "destination", "material", "quantity", "createdAt", "updatedAt"
     );
 
+    private static final Map<TransportRequestStatus, Set<TransportRequestStatus>> VALID_TRANSITIONS = Map.of(
+            TransportRequestStatus.CREATED, Set.of(
+                    TransportRequestStatus.APPROVED,
+                    TransportRequestStatus.REJECTED,
+                    TransportRequestStatus.CANCELLED
+            ),
+            TransportRequestStatus.APPROVED, Set.of(
+                    TransportRequestStatus.CANCELLED
+            ),
+            TransportRequestStatus.REJECTED, Set.of(),
+            TransportRequestStatus.CANCELLED, Set.of()
+    );
+
     public TransportRequestService(TransportRequestRepository transportRequestRepository) {
         this.transportRequestRepository = transportRequestRepository;
     }
@@ -130,34 +143,17 @@ public class TransportRequestService {
         TransportRequest transportRequest = transportRequestRepository.findById(id)
                 .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
 
-        if (transportRequest.getStatus().name().equals(transportRequestStatusUpdateDto.getStatus().name())) {
-            throw new TransportRequestStatusException("Transport request is already in status: " + transportRequest.getStatus());
-        } else if(transportRequest.getStatus().name().equals(TransportRequestStatus.CANCELLED.name()) &&
-                (
-                    transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.REJECTED.name())
-                            || transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.APPROVED.name())
-                            || transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.CREATED.name())
-                )
-        ) {
-            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
-        } else if (
-                transportRequest.getStatus().name().equals(TransportRequestStatus.APPROVED.name()) &&
-                        (
-                                transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.REJECTED.name())
-                        )
-        ) {
-            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
-        } else if (
-                transportRequest.getStatus().name().equals(TransportRequestStatus.REJECTED.name()) &&
-                        (
-                                transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.APPROVED.name())
-                                || transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.CANCELLED.name())
-                        )
-        ) {
-            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
-        }
+        TransportRequestStatus currentStatus = transportRequest.getStatus();
+        TransportRequestStatus newStatus = transportRequestStatusUpdateDto.getStatus();
 
-        transportRequest.setStatus(TransportRequestStatus.valueOf(transportRequestStatusUpdateDto.getStatus().name()));
+        if (currentStatus == newStatus)
+            throw new TransportRequestStatusException("Transport request is already in status: " + transportRequest.getStatus());
+
+        Set<TransportRequestStatus> allowedTargets = VALID_TRANSITIONS.getOrDefault(currentStatus, Set.of());
+        if(!allowedTargets.contains(newStatus))
+            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
+
+        transportRequest.setStatus(newStatus);
         TransportRequest savedTransportRequest = transportRequestRepository.save(transportRequest);
         return TransportRequestResponseDto.fromEntity(savedTransportRequest);
     }
