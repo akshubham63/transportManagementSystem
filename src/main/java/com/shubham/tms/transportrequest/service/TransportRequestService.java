@@ -3,6 +3,7 @@ package com.shubham.tms.transportrequest.service;
 import com.shubham.tms.transportrequest.dto.GetApiResponse;
 import com.shubham.tms.transportrequest.dto.TransportRequestBodyDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
+import com.shubham.tms.transportrequest.dto.TransportRequestStatusUpdateDto;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
@@ -116,6 +117,49 @@ public class TransportRequestService {
             throw new TransportRequestStatusException("Transport request with id: " + id + " is under process and cannot be updated!!!");
         }
         transportRequestRepository.delete(transportRequest);
+    }
+
+    public TransportRequestResponseDto updateTransportRequestStatus(UUID id, TransportRequestStatusUpdateDto transportRequestStatusUpdateDto) {
+        if(transportRequestStatusUpdateDto.getStatus().name().isEmpty()) {
+            throw new TransportRequestStatusException("Transport request status must not be null");
+        }
+        if(!TransportRequestStatus.isValid(transportRequestStatusUpdateDto.getStatus().name())) {
+            throw new TransportRequestStatusException("Invalid transport request status: " + transportRequestStatusUpdateDto.getStatus());
+        }
+
+        TransportRequest transportRequest = transportRequestRepository.findById(id)
+                .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
+
+        if (transportRequest.getStatus().name().equals(transportRequestStatusUpdateDto.getStatus().name())) {
+            throw new TransportRequestStatusException("Transport request is already in status: " + transportRequest.getStatus());
+        } else if(transportRequest.getStatus().name().equals(TransportRequestStatus.CANCELLED.name()) &&
+                (
+                    transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.REJECTED.name())
+                            || transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.APPROVED.name())
+                            || transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.CREATED.name())
+                )
+        ) {
+            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
+        } else if (
+                transportRequest.getStatus().name().equals(TransportRequestStatus.APPROVED.name()) &&
+                        (
+                                transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.REJECTED.name())
+                        )
+        ) {
+            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
+        } else if (
+                transportRequest.getStatus().name().equals(TransportRequestStatus.REJECTED.name()) &&
+                        (
+                                transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.APPROVED.name())
+                                || transportRequestStatusUpdateDto.getStatus().name().equals(TransportRequestStatus.CANCELLED.name())
+                        )
+        ) {
+            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
+        }
+
+        transportRequest.setStatus(TransportRequestStatus.valueOf(transportRequestStatusUpdateDto.getStatus().name()));
+        TransportRequest savedTransportRequest = transportRequestRepository.save(transportRequest);
+        return TransportRequestResponseDto.fromEntity(savedTransportRequest);
     }
 
     private Specification<TransportRequest> buildSpecification(
