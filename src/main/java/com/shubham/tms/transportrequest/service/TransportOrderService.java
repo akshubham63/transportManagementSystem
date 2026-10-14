@@ -26,13 +26,13 @@ public class TransportOrderService {
     }
 
     public TransportOrder createTransportOrder(UUID transportRequestId) {
+        if(transportOrderRepository.existsByTransportRequestId(transportRequestId)) {
+            throw new TransportOrderAlreadyExists("A transport order already exists for transport request ID: " + transportRequestId);
+        }
         TransportRequest transportRequest = transportRequestRepository.findById(transportRequestId)
                 .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + transportRequestId + " not found"));
         if(transportRequest.getStatus() != TransportRequestStatus.APPROVED) {
             throw new TransportException("Cannot create transport order. Transport request with ID " +transportRequestId + " is currently in " + transportRequest.getStatus() + " status, but must be APPROVED.");
-        }
-        if(transportOrderRepository.existsByTransportRequestId(transportRequestId)) {
-            throw new TransportOrderAlreadyExists("A transport order already exists for transport request ID: " + transportRequestId);
         }
 
         TransportOrder transportOrder = TransportOrder.builder()

@@ -13,14 +13,14 @@ import java.util.UUID;
 @Data
 public class TransportOrderResponse {
     private UUID id;
-    private UUID transportRequest;
+    private UUID transportRequestId;
     private String requestNumber;
     private Date createdAt;
 
     public static TransportOrderResponse fromEntity(TransportOrder transportOrder){
         return TransportOrderResponse.builder()
                 .id(transportOrder.getId())
-                .transportRequest(transportOrder.getTransportRequest().getId())
+                .transportRequestId(transportOrder.getTransportRequest().getId())
                 .requestNumber(transportOrder.getTransportRequest().getRequestNumber())
                 .createdAt(transportOrder.getCreatedAt())
                 .build();
