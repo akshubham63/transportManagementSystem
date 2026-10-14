@@ -14,6 +14,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_transport_order_request",
+                columnNames = "transport_request_id"
+        )
+)
 public class TransportOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
