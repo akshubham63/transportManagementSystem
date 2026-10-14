@@ -8,6 +8,7 @@ import com.shubham.tms.transportrequest.exceptions.TransportRequestNotFoundExcep
 import com.shubham.tms.transportrequest.exceptions.TransportException;
 import com.shubham.tms.transportrequest.repository.TransportOrderRepository;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -38,7 +39,29 @@ public class TransportOrderService {
         TransportOrder transportOrder = TransportOrder.builder()
                 .transportRequest(transportRequest)
                 .build();
+        try {
+            return transportOrderRepository.save(transportOrder);
+        } catch (DataIntegrityViolationException ex) {
+            if(isTransportRequestUniqueConstraintViolation(ex)) {
+                throw new TransportOrderAlreadyExists(
+                        "A transport order already exists for transport request ID: "
+                                + transportRequestId
+                );
+            }
+            throw ex;
+        }
+    }
 
-        return transportOrderRepository.save(transportOrder);
+    private boolean isTransportRequestUniqueConstraintViolation(DataIntegrityViolationException ex) {
+        Throwable cause = ex;
+
+        while (cause != null) {
+            if(cause instanceof org.hibernate.exception.ConstraintViolationException cve) {
+                return "uk_transport_order_request".equals(cve.getConstraintName());
+            }
+            cause = cause.getCause();
+        }
+
+        return false;
     }
 }
