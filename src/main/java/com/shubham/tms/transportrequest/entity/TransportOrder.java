@@ -29,7 +29,6 @@ public class TransportOrder {
     @JoinColumn(
             name = "transport_request_id",
             nullable = false,
-            unique = true,
             foreignKey = @ForeignKey(name = "uk_transport_order_request")
     )
     private TransportRequest transportRequest;
