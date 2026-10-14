@@ -24,7 +24,7 @@ public class TransportOrderController {
     @PostMapping("/{id}/transport-order")
     public ResponseEntity<TransportOrderResponse> createTransportOrder(@PathVariable("id") UUID id) {
         TransportOrder transportOrder = transportOrderService.createTransportOrder(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(TransportOrderResponse.fromEntity(transportOrder));
     }
 }
