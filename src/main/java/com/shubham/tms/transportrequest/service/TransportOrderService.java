@@ -40,7 +40,7 @@ public class TransportOrderService {
                 .transportRequest(transportRequest)
                 .build();
         try {
-            return transportOrderRepository.save(transportOrder);
+            return transportOrderRepository.saveAndFlush(transportOrder);
         } catch (DataIntegrityViolationException ex) {
             if(isTransportRequestUniqueConstraintViolation(ex)) {
                 throw new TransportOrderAlreadyExists(
