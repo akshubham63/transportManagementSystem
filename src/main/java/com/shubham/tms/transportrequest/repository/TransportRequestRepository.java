@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.UUID;
 
 public interface TransportRequestRepository extends JpaRepository<TransportRequest, UUID>, JpaSpecificationExecutor<TransportRequest> {
-    Boolean existsByIdempotencyKey(String key);
+    boolean existsByIdempotencyKey(String key);
 }

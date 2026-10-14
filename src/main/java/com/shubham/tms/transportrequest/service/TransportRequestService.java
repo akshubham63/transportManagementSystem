@@ -9,7 +9,7 @@ import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
 import com.shubham.tms.transportrequest.exceptions.DuplicateIdempotencyKeyException;
 import com.shubham.tms.transportrequest.exceptions.TransportRequestNotFoundException;
-import com.shubham.tms.transportrequest.exceptions.TransportRequestStatusException;
+import com.shubham.tms.transportrequest.exceptions.TransportException;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -111,7 +111,7 @@ public class TransportRequestService {
         TransportRequest transportRequest = transportRequestRepository.findById(id)
                 .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
         if(!transportRequest.getStatus().equals(TransportRequestStatus.CREATED)) {
-            throw new TransportRequestStatusException("Transport request with id: " + id + " is under process and cannot be updated!!!");
+            throw new TransportException("Transport request with id: " + id + " is under process and cannot be updated!!!");
         }
         transportRequest.setDestination(transportRequestBodyDto.getDestination());
         transportRequest.setPriority(transportRequestBodyDto.getPriority());
@@ -127,17 +127,17 @@ public class TransportRequestService {
         TransportRequest transportRequest = transportRequestRepository.findById(id)
                 .orElseThrow(() -> new TransportRequestNotFoundException("Transport request with id: " + id + " not found"));
         if(!transportRequest.getStatus().equals(TransportRequestStatus.CREATED)) {
-            throw new TransportRequestStatusException("Transport request with id: " + id + " is under process and cannot be updated!!!");
+            throw new TransportException("Transport request with id: " + id + " is under process and cannot be updated!!!");
         }
         transportRequestRepository.delete(transportRequest);
     }
 
     public TransportRequestResponseDto updateTransportRequestStatus(UUID id, TransportRequestStatusUpdateDto transportRequestStatusUpdateDto) {
         if(transportRequestStatusUpdateDto.getStatus().name().isEmpty()) {
-            throw new TransportRequestStatusException("Transport request status must not be null");
+            throw new TransportException("Transport request status must not be null");
         }
         if(!TransportRequestStatus.isValid(transportRequestStatusUpdateDto.getStatus().name())) {
-            throw new TransportRequestStatusException("Invalid transport request status: " + transportRequestStatusUpdateDto.getStatus());
+            throw new TransportException("Invalid transport request status: " + transportRequestStatusUpdateDto.getStatus());
         }
 
         TransportRequest transportRequest = transportRequestRepository.findById(id)
@@ -147,11 +147,11 @@ public class TransportRequestService {
         TransportRequestStatus newStatus = transportRequestStatusUpdateDto.getStatus();
 
         if (currentStatus == newStatus)
-            throw new TransportRequestStatusException("Transport request is already in status: " + transportRequest.getStatus());
+            throw new TransportException("Transport request is already in status: " + transportRequest.getStatus());
 
         Set<TransportRequestStatus> allowedTargets = VALID_TRANSITIONS.getOrDefault(currentStatus, Set.of());
         if(!allowedTargets.contains(newStatus))
-            throw new TransportRequestStatusException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
+            throw new TransportException("Cannot transition transport request from " + transportRequest.getStatus() + " to " + transportRequestStatusUpdateDto.getStatus());
 
         transportRequest.setStatus(newStatus);
         TransportRequest savedTransportRequest = transportRequestRepository.save(transportRequest);

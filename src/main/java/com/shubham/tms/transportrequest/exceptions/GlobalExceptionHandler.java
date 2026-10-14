@@ -11,7 +11,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
@@ -55,9 +54,16 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(status, ex.getMessage(), request.getRequestURI()));
     }
 
-    @ExceptionHandler(TransportRequestStatusException.class)
-    public ResponseEntity<ApiErrorResponse> handleTransportRequestStatusException(TransportRequestStatusException ex, HttpServletRequest request) {
+    @ExceptionHandler(TransportException.class)
+    public ResponseEntity<ApiErrorResponse> handleTransportRequestStatusException(TransportException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status)
+                .body(new ApiErrorResponse(status, ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(TransportOrderAlreadyExists.class)
+    public ResponseEntity<ApiErrorResponse> handleTransportOrderAlreadyExistsException(TransportOrderAlreadyExists ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
         return ResponseEntity.status(status)
                 .body(new ApiErrorResponse(status, ex.getMessage(), request.getRequestURI()));
     }
