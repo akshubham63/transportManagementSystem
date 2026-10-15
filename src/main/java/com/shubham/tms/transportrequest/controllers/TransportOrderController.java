@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({"/api/transport-requests", "/api/transport-orders"})
 public class TransportOrderController {
     public final TransportOrderService transportOrderService;
 
@@ -19,21 +18,21 @@ public class TransportOrderController {
         this.transportOrderService = transportOrderService;
     }
 
-    @PostMapping("/{id}/transport-order")
+    @PostMapping("/api/transport-requests/{id}/transport-order")
     public ResponseEntity<TransportOrderResponse> createTransportOrder(@PathVariable("id") UUID id) {
         TransportOrder transportOrder = transportOrderService.createTransportOrder(id);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(TransportOrderResponse.fromEntity(transportOrder));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/transport-orders/{id}")
     public ResponseEntity<TransportOrderResponse> getTransportOrderById(@PathVariable("id") UUID id) {
         TransportOrderResponse transportOrderResponse = transportOrderService.getTransportOrderById(id);
         return ResponseEntity.ok()
                 .body(transportOrderResponse);
     }
 
-    @GetMapping
+    @GetMapping("/api/transport-orders")
     public ResponseEntity<List<TransportOrderResponse>> getAllTransportOrders() {
         List<TransportOrderResponse> transportOrderResponseList = transportOrderService.getAllTransportOrders();
         return ResponseEntity.ok()

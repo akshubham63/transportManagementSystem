@@ -57,7 +57,7 @@ public class TransportOrderService {
 
     public TransportOrderResponse getTransportOrderById(UUID transportOrderId) {
         TransportOrder transportOrder = transportOrderRepository.findById(transportOrderId)
-                .orElseThrow(() -> new TransportOrderNotFoundException("Transport request with id: " + transportOrderId + " not found"));
+                .orElseThrow(() -> new TransportOrderNotFoundException("Transport order with id: " + transportOrderId + " not found"));
         return TransportOrderResponse.fromEntity(transportOrder);
     }
 
