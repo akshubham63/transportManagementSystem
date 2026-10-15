@@ -1,5 +1,7 @@
 package com.shubham.tms.transportrequest.service;
 
+import com.shubham.tms.transportrequest.exceptions.TransportOrderNotFoundException;
+import com.shubham.tms.transportrequest.dto.TransportOrderResponse;
 import com.shubham.tms.transportrequest.entity.TransportOrder;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
@@ -11,6 +13,7 @@ import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -50,6 +53,19 @@ public class TransportOrderService {
             }
             throw ex;
         }
+    }
+
+    public TransportOrderResponse getTransportOrderById(UUID transportOrderId) {
+        TransportOrder transportOrder = transportOrderRepository.findById(transportOrderId)
+                .orElseThrow(() -> new TransportOrderNotFoundException("Transport order with id: " + transportOrderId + " not found"));
+        return TransportOrderResponse.fromEntity(transportOrder);
+    }
+
+    public List<TransportOrderResponse> getAllTransportOrders() {
+        List<TransportOrder> transportOrderList = transportOrderRepository.findAll();
+        return transportOrderList.stream()
+                    .map(TransportOrderResponse::fromEntity)
+                    .toList();
     }
 
     private boolean isTransportRequestUniqueConstraintViolation(DataIntegrityViolationException ex) {
