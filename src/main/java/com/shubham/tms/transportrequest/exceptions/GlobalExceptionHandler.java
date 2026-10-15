@@ -40,6 +40,13 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponse(status, ex.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler(TransportOrderNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleTransportOrderNotFoundException(TransportOrderNotFoundException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status)
+                .body(new ApiErrorResponse(status, ex.getMessage(), request.getRequestURI()));
+    }
+
     @ExceptionHandler(java.lang.IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(java.lang.IllegalArgumentException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;

@@ -5,15 +5,13 @@ import com.shubham.tms.transportrequest.entity.TransportOrder;
 import com.shubham.tms.transportrequest.service.TransportOrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/transport-requests")
+@RequestMapping({"/api/transport-requests", "/api/transport-orders"})
 public class TransportOrderController {
     public final TransportOrderService transportOrderService;
 
@@ -26,5 +24,19 @@ public class TransportOrderController {
         TransportOrder transportOrder = transportOrderService.createTransportOrder(id);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(TransportOrderResponse.fromEntity(transportOrder));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TransportOrderResponse> getTransportOrderById(@PathVariable("id") UUID id) {
+        TransportOrderResponse transportOrderResponse = transportOrderService.getTransportOrderById(id);
+        return ResponseEntity.ok()
+                .body(transportOrderResponse);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TransportOrderResponse>> getAllTransportOrders() {
+        List<TransportOrderResponse> transportOrderResponseList = transportOrderService.getAllTransportOrders();
+        return ResponseEntity.ok()
+                .body(transportOrderResponseList);
     }
 }
