@@ -29,7 +29,7 @@ public class TransportOrderService {
     public final TransportOrderRepository transportOrderRepository;
     public final TransportRequestRepository transportRequestRepository;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "createdAt", "requestNumber"
+            "createdAt"
     );
 
     public TransportOrderService(
@@ -73,7 +73,7 @@ public class TransportOrderService {
     }
 
     public GetApiResponse<TransportOrderResponse> getAllTransportOrders(
-            int page, int limit, SortDirection direction, String sortBy
+            int page, int limit, SortDirection sortDirection, String sortBy
     ) {
         String finalSortBy;
         if(sortBy == null) {
@@ -85,7 +85,7 @@ public class TransportOrderService {
                     "'. Allowed fields are: " + ALLOWED_SORT_FIELDS);
         }
         Sort sort = Sort.by(
-                direction == SortDirection.ASC ? Sort.Direction.ASC : Sort.Direction.DESC,
+                sortDirection != null && sortDirection.equals(SortDirection.DESC)? Sort.Direction.DESC : Sort.Direction.ASC,
                 finalSortBy
         );
         Pageable pageable = PageRequest.of(page, limit, sort);
