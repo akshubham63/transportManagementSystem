@@ -1,5 +1,7 @@
 package com.shubham.tms.transportrequest.service;
 
+import com.shubham.tms.transportrequest.dto.GetApiResponse;
+import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.exceptions.TransportOrderNotFoundException;
 import com.shubham.tms.transportrequest.dto.TransportOrderResponse;
 import com.shubham.tms.transportrequest.entity.TransportOrder;
@@ -11,15 +13,24 @@ import com.shubham.tms.transportrequest.exceptions.TransportException;
 import com.shubham.tms.transportrequest.repository.TransportOrderRepository;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class TransportOrderService {
     public final TransportOrderRepository transportOrderRepository;
     public final TransportRequestRepository transportRequestRepository;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "createdAt"
+    );
 
     public TransportOrderService(
             TransportOrderRepository transportOrderRepository,
@@ -61,11 +72,32 @@ public class TransportOrderService {
         return TransportOrderResponse.fromEntity(transportOrder);
     }
 
-    public List<TransportOrderResponse> getAllTransportOrders() {
-        List<TransportOrder> transportOrderList = transportOrderRepository.findAll();
-        return transportOrderList.stream()
-                    .map(TransportOrderResponse::fromEntity)
-                    .toList();
+    public GetApiResponse<TransportOrderResponse> getAllTransportOrders(
+            int page, int limit, SortDirection sortDirection, String sortBy
+    ) {
+        String finalSortBy;
+        if(sortBy == null) {
+            finalSortBy = "createdAt";
+        } else if (ALLOWED_SORT_FIELDS.contains(sortBy)) {
+            finalSortBy = sortBy;
+        } else {
+            throw new IllegalArgumentException("Invalid sort field: '" + sortBy +
+                    "'. Allowed fields are: " + ALLOWED_SORT_FIELDS);
+        }
+        Sort sort = Sort.by(
+                sortDirection != null && sortDirection.equals(SortDirection.DESC)? Sort.Direction.DESC : Sort.Direction.ASC,
+                finalSortBy
+        );
+        Pageable pageable = PageRequest.of(page, limit, sort);
+        Page<TransportOrder> transportOrderList = transportOrderRepository.findAll(pageable);
+        List<TransportOrderResponse> transportOrderResponseList = transportOrderList.stream()
+                .map(TransportOrderResponse::fromEntity)
+                .toList();
+        return GetApiResponse.<TransportOrderResponse>builder()
+                .count(transportOrderResponseList.size())
+                .totalRecords(transportOrderList.getTotalElements())
+                .data(transportOrderResponseList)
+                .build();
     }
 
     private boolean isTransportRequestUniqueConstraintViolation(DataIntegrityViolationException ex) {
