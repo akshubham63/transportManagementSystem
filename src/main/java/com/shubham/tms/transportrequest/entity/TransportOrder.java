@@ -1,5 +1,6 @@
 package com.shubham.tms.transportrequest.entity;
 
+import com.shubham.tms.transportrequest.enums.TransportOrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,11 +34,23 @@ public class TransportOrder {
     )
     private TransportRequest transportRequest;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransportOrderStatus transportOrderStatus;
+
     @Column(nullable = false, updatable = false)
     private Date createdAt;
 
+    private Date updatedAt;
+
     @PrePersist
     protected void onCreated() {
+        setTransportOrderStatus(TransportOrderStatus.CREATED);
         setCreatedAt(new Date());
+    }
+
+    @PreUpdate
+    protected void onUpdated() {
+        setUpdatedAt(new Date());
     }
 }

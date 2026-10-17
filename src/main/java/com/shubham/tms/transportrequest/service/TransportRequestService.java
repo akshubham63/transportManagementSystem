@@ -1,6 +1,6 @@
 package com.shubham.tms.transportrequest.service;
 
-import com.shubham.tms.transportrequest.dto.GetApiResponse;
+import com.shubham.tms.transportrequest.dto.GetApiResponseDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestBodyDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestStatusUpdateDto;
@@ -72,7 +72,7 @@ public class TransportRequestService {
         }
     }
 
-    public GetApiResponse<TransportRequestResponseDto> getAllTransportRequest(
+    public GetApiResponseDto<TransportRequestResponseDto> getAllTransportRequest(
             Integer page, Integer limit, TransportRequestStatus status, Integer priority, String source, String destination, String material, Double quantity, Date createdAt, Date updatedAt, SortDirection sortDirection, String sortBy
     ) {
         String finalSortBy;
@@ -94,7 +94,7 @@ public class TransportRequestService {
         List<TransportRequestResponseDto> transportRequestResponseDtoList = transportRequestList.stream()
                 .map(TransportRequestResponseDto::fromEntity)
                 .toList();
-        return GetApiResponse.<TransportRequestResponseDto>builder()
+        return GetApiResponseDto.<TransportRequestResponseDto>builder()
                     .count(transportRequestResponseDtoList.size())
                     .totalRecords(transportRequestList.getTotalElements())
                     .data(transportRequestResponseDtoList)

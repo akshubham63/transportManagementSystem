@@ -1,6 +1,6 @@
 package com.shubham.tms.transportrequest.controllers;
 
-import com.shubham.tms.transportrequest.dto.GetApiResponse;
+import com.shubham.tms.transportrequest.dto.GetApiResponseDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestBodyDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestResponseDto;
 import com.shubham.tms.transportrequest.dto.TransportRequestStatusUpdateDto;
@@ -39,7 +39,7 @@ public class TransportRequestController {
     }
 
     @GetMapping
-    public ResponseEntity<GetApiResponse<TransportRequestResponseDto>> getAllTransportRequest(
+    public ResponseEntity<GetApiResponseDto<TransportRequestResponseDto>> getAllTransportRequest(
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page index must be 0 or greater") Integer page,
             @RequestParam(defaultValue = "10") @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 100, message = "Limit must be less than or equal to 100") Integer limit,
             @RequestParam(required = false) TransportRequestStatus status,
@@ -53,7 +53,7 @@ public class TransportRequestController {
             @RequestParam(required = false) SortDirection sortDirection,
             @RequestParam(required = false) String sortBy
             ) {
-        GetApiResponse<TransportRequestResponseDto> allTransportRequest = transportRequestService.getAllTransportRequest(
+        GetApiResponseDto<TransportRequestResponseDto> allTransportRequest = transportRequestService.getAllTransportRequest(
                 page, limit, status, priority, source, destination, material, quantity, updatedAt, createdAt, sortDirection, sortBy
         );
         return ResponseEntity.ok(allTransportRequest);
