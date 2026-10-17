@@ -45,6 +45,7 @@ public class TransportOrder {
 
     @PrePersist
     protected void onCreated() {
+        setTransportOrderStatus(TransportOrderStatus.CREATED);
         setCreatedAt(new Date());
     }
 

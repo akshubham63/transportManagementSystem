@@ -6,6 +6,7 @@ import com.shubham.tms.transportrequest.dto.TransportOrderStatusUpdateDto;
 import com.shubham.tms.transportrequest.entity.TransportOrder;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.service.TransportOrderService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
@@ -53,7 +54,7 @@ public class TransportOrderController {
     @PatchMapping("/api/transport-orders/{id}/status")
     public ResponseEntity<TransportOrderResponseDto> updateTransportOrderStatus(
             @PathVariable("id") UUID transportOrderId,
-            @RequestBody TransportOrderStatusUpdateDto transportOrderStatusUpdateDto
+            @Valid @RequestBody TransportOrderStatusUpdateDto transportOrderStatusUpdateDto
     ) {
         TransportOrderResponseDto transportOrderResponseDto = transportOrderService.updateTransportOrderStatus(transportOrderId, transportOrderStatusUpdateDto);
         return ResponseEntity.ok(transportOrderResponseDto);
