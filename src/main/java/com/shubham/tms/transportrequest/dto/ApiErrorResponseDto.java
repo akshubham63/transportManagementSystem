@@ -13,7 +13,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApiErrorResponse {
+public class ApiErrorResponseDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime timeStamp;
     int status;
@@ -24,12 +24,12 @@ public class ApiErrorResponse {
     Map<String, String> fieldErrors;
 
     // Core constructor for standard exception responses
-    public ApiErrorResponse(HttpStatus status, String message, String path) {
+    public ApiErrorResponseDto(HttpStatus status, String message, String path) {
         this(LocalDateTime.now(), status.value(), status.getReasonPhrase(), message, path, null);
     }
 
     // Secondary constructor tailored for multi-field validation maps
-    public ApiErrorResponse(HttpStatus status, String message, String path, Map<String, String> fieldErrors) {
+    public ApiErrorResponseDto(HttpStatus status, String message, String path, Map<String, String> fieldErrors) {
         this(LocalDateTime.now(), status.value(), status.getReasonPhrase(), message, path, fieldErrors);
     }
 }

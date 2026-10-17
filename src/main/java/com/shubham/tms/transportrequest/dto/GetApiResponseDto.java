@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class GetApiResponse<T> {
+public class GetApiResponseDto<T> {
     private List<T> data;
     private Long totalRecords;
     private int count;

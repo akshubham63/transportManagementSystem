@@ -1,9 +1,11 @@
 package com.shubham.tms.transportrequest.service;
 
-import com.shubham.tms.transportrequest.dto.GetApiResponse;
+import com.shubham.tms.transportrequest.dto.GetApiResponseDto;
+import com.shubham.tms.transportrequest.dto.TransportOrderStatusUpdateDto;
 import com.shubham.tms.transportrequest.enums.SortDirection;
+import com.shubham.tms.transportrequest.enums.TransportOrderStatus;
 import com.shubham.tms.transportrequest.exceptions.TransportOrderNotFoundException;
-import com.shubham.tms.transportrequest.dto.TransportOrderResponse;
+import com.shubham.tms.transportrequest.dto.TransportOrderResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportOrder;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
@@ -19,10 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map;
 
 @Service
 public class TransportOrderService {
@@ -30,6 +32,17 @@ public class TransportOrderService {
     public final TransportRequestRepository transportRequestRepository;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "createdAt"
+    );
+    private static final Map<TransportOrderStatus, Set<TransportOrderStatus>> VALID_TRANSITION = Map.of(
+            TransportOrderStatus.CREATED, Set.of(
+                    TransportOrderStatus.ASSIGNED
+            ),
+            TransportOrderStatus.ASSIGNED, Set.of(
+                    TransportOrderStatus.IN_TRANSIT
+            ),
+            TransportOrderStatus.IN_TRANSIT, Set.of(
+                    TransportOrderStatus.COMPLETED
+            )
     );
 
     public TransportOrderService(
@@ -52,6 +65,7 @@ public class TransportOrderService {
 
         TransportOrder transportOrder = TransportOrder.builder()
                 .transportRequest(transportRequest)
+                .transportOrderStatus(TransportOrderStatus.CREATED)
                 .build();
         try {
             return transportOrderRepository.saveAndFlush(transportOrder);
@@ -66,13 +80,13 @@ public class TransportOrderService {
         }
     }
 
-    public TransportOrderResponse getTransportOrderById(UUID transportOrderId) {
+    public TransportOrderResponseDto getTransportOrderById(UUID transportOrderId) {
         TransportOrder transportOrder = transportOrderRepository.findById(transportOrderId)
                 .orElseThrow(() -> new TransportOrderNotFoundException("Transport order with id: " + transportOrderId + " not found"));
-        return TransportOrderResponse.fromEntity(transportOrder);
+        return TransportOrderResponseDto.fromEntity(transportOrder);
     }
 
-    public GetApiResponse<TransportOrderResponse> getAllTransportOrders(
+    public GetApiResponseDto<TransportOrderResponseDto> getAllTransportOrders(
             int page, int limit, SortDirection sortDirection, String sortBy
     ) {
         String finalSortBy;
@@ -90,14 +104,38 @@ public class TransportOrderService {
         );
         Pageable pageable = PageRequest.of(page, limit, sort);
         Page<TransportOrder> transportOrderList = transportOrderRepository.findAll(pageable);
-        List<TransportOrderResponse> transportOrderResponseList = transportOrderList.stream()
-                .map(TransportOrderResponse::fromEntity)
+        List<TransportOrderResponseDto> transportOrderResponseDtoList = transportOrderList.stream()
+                .map(TransportOrderResponseDto::fromEntity)
                 .toList();
-        return GetApiResponse.<TransportOrderResponse>builder()
-                .count(transportOrderResponseList.size())
+        return GetApiResponseDto.<TransportOrderResponseDto>builder()
+                .count(transportOrderResponseDtoList.size())
                 .totalRecords(transportOrderList.getTotalElements())
-                .data(transportOrderResponseList)
+                .data(transportOrderResponseDtoList)
                 .build();
+    }
+
+    public TransportOrderResponseDto updateTransportOrderStatus(UUID transportOrderId, TransportOrderStatusUpdateDto transportOrderStatusUpdateDto) {
+        if(!TransportOrderStatus.isValid(transportOrderStatusUpdateDto.getStatus().name())) {
+            throw new TransportException("Invalid transport order status: " + transportOrderStatusUpdateDto.getStatus());
+        }
+        TransportOrder transportOrder = transportOrderRepository.findById(transportOrderId)
+                .orElseThrow(() -> new TransportOrderNotFoundException("Transport order with id: " + transportOrderId + " not found"));
+
+        TransportOrderStatus currentOrderStatus = transportOrder.getTransportOrderStatus();
+        TransportOrderStatus newStatus = transportOrderStatusUpdateDto.getStatus();
+
+        if(currentOrderStatus == newStatus) {
+            throw new TransportException("Transport order is already in status: " + currentOrderStatus);
+        }
+
+        Set<TransportOrderStatus> allowedTargets = VALID_TRANSITION.getOrDefault(currentOrderStatus, Set.of());
+        if(!allowedTargets.contains(newStatus)) {
+            throw new TransportException("Cannot transition transport order from " + currentOrderStatus + " to " + newStatus);
+        }
+
+        transportOrder.setTransportOrderStatus(transportOrderStatusUpdateDto.getStatus());
+        TransportOrder updatedTransportOrder = transportOrderRepository.save(transportOrder);
+        return TransportOrderResponseDto.fromEntity(updatedTransportOrder);
     }
 
     private boolean isTransportRequestUniqueConstraintViolation(DataIntegrityViolationException ex) {
