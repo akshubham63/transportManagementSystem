@@ -19,7 +19,7 @@ import java.util.Set;
 @Service
 public class FleetService {
     public final FleetRepository fleetRepository;
-    private final Set<String> ALLOWED_SORT_BY_FIELDS = Set.of("createdAt", "name");
+    private final Set<String> ALLOWED_SORT_BY_FIELDS = Set.of("name");
 
     public FleetService(
             FleetRepository fleetRepository
@@ -28,7 +28,7 @@ public class FleetService {
     }
 
     public VehicleResponseDto createFleet(VehicleRequestDto vehicleRequestDto) {
-        if(fleetRepository.findByName(vehicleRequestDto.getName()).isEmpty()){
+        if(fleetRepository.findByName(vehicleRequestDto.getName()).isPresent()){
            throw new DuplicateVehicleNameException("Vehicle name " + vehicleRequestDto.getName() + " already exists.");
         }
         Vehicle vehicle = Vehicle.builder()

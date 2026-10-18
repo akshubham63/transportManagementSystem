@@ -33,7 +33,7 @@ public class TransportOrderService {
     );
     private static final Map<TransportOrderStatus, Set<TransportOrderStatus>> VALID_TRANSITION = Map.of(
             TransportOrderStatus.CREATED, Set.of(
-                    TransportOrderStatus.ASSIGNED
+                    TransportOrderStatus.REJECTED
             ),
             TransportOrderStatus.ASSIGNED, Set.of(
                     TransportOrderStatus.IN_TRANSIT

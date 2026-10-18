@@ -9,7 +9,7 @@ import lombok.Builder;
 @Builder
 @Data
 public class VehicleRequestDto {
-    @NotBlank(message = "Vehicle name can not be null.")
+    @NotBlank(message = "Vehicle name is mandatory")
     private String name;
 
     @NotNull(message = "Fleet type must not be null")
