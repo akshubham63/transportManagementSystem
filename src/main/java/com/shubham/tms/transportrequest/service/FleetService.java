@@ -4,6 +4,7 @@ import com.shubham.tms.transportrequest.dto.GetApiResponseDto;
 import com.shubham.tms.transportrequest.dto.VehicleRequestDto;
 import com.shubham.tms.transportrequest.dto.VehicleResponseDto;
 import com.shubham.tms.transportrequest.entity.Vehicle;
+import com.shubham.tms.transportrequest.exceptions.DuplicateVehicleNameException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class FleetService {
     }
 
     public VehicleResponseDto createFleet(VehicleRequestDto vehicleRequestDto) {
+        if(fleetRepository.findByName(vehicleRequestDto.getName()).isEmpty()){
+           throw new DuplicateVehicleNameException("Vehicle name " + vehicleRequestDto.getName() + " already exists.");
+        }
         Vehicle vehicle = Vehicle.builder()
                 .name(vehicleRequestDto.getName())
                 .fleetTypeEnum(vehicleRequestDto.getFleetTypeEnum())
