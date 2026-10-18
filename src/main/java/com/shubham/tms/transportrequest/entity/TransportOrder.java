@@ -43,11 +43,12 @@ public class TransportOrder {
 
     private Date updatedAt;
 
-    @Column(
-            nullable = false,
-            updatable = false
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "vehicle_id",
+            foreignKey = @ForeignKey(name = "fk_transport_order_vehicle")
     )
-    private UUID vehicleId;
+    private Vehicle vehicle;
 
     @PrePersist
     protected void onCreated() {

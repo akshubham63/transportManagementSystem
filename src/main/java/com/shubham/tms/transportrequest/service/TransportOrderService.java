@@ -148,7 +148,7 @@ public class TransportOrderService {
             if (vehicle.isEmpty()) {
                 throw new VehicleNotFoundException("Vehicle with name: " + vehicleAssignmentRequestDto.getName() + " not found");
             } else {
-                transportOrder.setVehicleId(vehicle.get().getId());
+                transportOrder.setVehicle(vehicle.get());
                 transportOrder.setTransportOrderStatus(TransportOrderStatus.ASSIGNED);
                 TransportOrder updatedTransportOrder = transportOrderRepository.save(transportOrder);
                 return TransportOrderResponseDto.fromEntity(updatedTransportOrder);
