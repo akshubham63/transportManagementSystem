@@ -2,16 +2,16 @@ package com.shubham.tms.transportrequest.service;
 
 import com.shubham.tms.transportrequest.dto.GetApiResponseDto;
 import com.shubham.tms.transportrequest.dto.TransportOrderStatusUpdateDto;
+import com.shubham.tms.transportrequest.dto.VehicleAssignmentRequestDto;
+import com.shubham.tms.transportrequest.entity.Vehicle;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.enums.TransportOrderStatus;
-import com.shubham.tms.transportrequest.exceptions.TransportOrderNotFoundException;
+import com.shubham.tms.transportrequest.exceptions.*;
 import com.shubham.tms.transportrequest.dto.TransportOrderResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportOrder;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
-import com.shubham.tms.transportrequest.exceptions.TransportOrderAlreadyExists;
-import com.shubham.tms.transportrequest.exceptions.TransportRequestNotFoundException;
-import com.shubham.tms.transportrequest.exceptions.TransportException;
+import com.shubham.tms.transportrequest.repository.FleetRepository;
 import com.shubham.tms.transportrequest.repository.TransportOrderRepository;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,15 +21,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class TransportOrderService {
     public final TransportOrderRepository transportOrderRepository;
     public final TransportRequestRepository transportRequestRepository;
+    public final FleetRepository fleetRepository;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "createdAt"
     );
@@ -47,10 +45,12 @@ public class TransportOrderService {
 
     public TransportOrderService(
             TransportOrderRepository transportOrderRepository,
-            TransportRequestRepository transportRequestRepository
+            TransportRequestRepository transportRequestRepository,
+            FleetRepository fleetRepository
     ) {
         this.transportOrderRepository = transportOrderRepository;
         this.transportRequestRepository = transportRequestRepository;
+        this.fleetRepository = fleetRepository;
     }
 
     public TransportOrder createTransportOrder(UUID transportRequestId) {
@@ -129,6 +129,9 @@ public class TransportOrderService {
         }
 
         Set<TransportOrderStatus> allowedTargets = VALID_TRANSITION.getOrDefault(currentOrderStatus, Set.of());
+        if(newStatus == TransportOrderStatus.ASSIGNED && transportOrder.getVehicle() == null) {
+            throw new TransportException("A vehicle must be assigned before moving the transport order to ASSIGNED.");
+        }
         if(!allowedTargets.contains(newStatus)) {
             throw new TransportException("Cannot transition transport order from " + currentOrderStatus + " to " + newStatus);
         }
@@ -136,6 +139,26 @@ public class TransportOrderService {
         transportOrder.setTransportOrderStatus(transportOrderStatusUpdateDto.getStatus());
         TransportOrder updatedTransportOrder = transportOrderRepository.save(transportOrder);
         return TransportOrderResponseDto.fromEntity(updatedTransportOrder);
+    }
+
+    public TransportOrderResponseDto updateTransportOrderVehicleAssignment(
+            UUID transportOrderId, VehicleAssignmentRequestDto vehicleAssignmentRequestDto
+            ) {
+        TransportOrder transportOrder = transportOrderRepository.findById(transportOrderId)
+                .orElseThrow(() -> new TransportOrderNotFoundException("Transport order with id: " + transportOrderId + " not found"));
+        if(transportOrder.getTransportOrderStatus().equals(TransportOrderStatus.CREATED)) {
+            Optional<Vehicle> vehicle = fleetRepository.findByName(vehicleAssignmentRequestDto.getName());
+            if (vehicle.isEmpty()) {
+                throw new VehicleNotFoundException("Vehicle with name: " + vehicleAssignmentRequestDto.getName() + " not found");
+            } else {
+                transportOrder.setVehicle(vehicle.get());
+                transportOrder.setTransportOrderStatus(TransportOrderStatus.ASSIGNED);
+                TransportOrder updatedTransportOrder = transportOrderRepository.save(transportOrder);
+                return TransportOrderResponseDto.fromEntity(updatedTransportOrder);
+            }
+        } else {
+            throw new TransportException("Driver assignment is allowed only when the transport order status is CREATED.");
+        }
     }
 
     private boolean isTransportRequestUniqueConstraintViolation(DataIntegrityViolationException ex) {

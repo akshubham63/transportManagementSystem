@@ -43,6 +43,13 @@ public class TransportOrder {
 
     private Date updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "vehicle_id",
+            foreignKey = @ForeignKey(name = "fk_transport_order_vehicle")
+    )
+    private Vehicle vehicle;
+
     @PrePersist
     protected void onCreated() {
         setTransportOrderStatus(TransportOrderStatus.CREATED);
