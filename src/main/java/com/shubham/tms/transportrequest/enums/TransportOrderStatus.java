@@ -6,8 +6,7 @@ public enum TransportOrderStatus {
     CREATED,
     ASSIGNED,
     IN_TRANSIT,
-    COMPLETED,
-    REJECTED;
+    COMPLETED;
 
     public static boolean isValid(String value) {
         if(value == null) {

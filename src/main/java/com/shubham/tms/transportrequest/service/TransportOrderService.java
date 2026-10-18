@@ -33,7 +33,7 @@ public class TransportOrderService {
     );
     private static final Map<TransportOrderStatus, Set<TransportOrderStatus>> VALID_TRANSITION = Map.of(
             TransportOrderStatus.CREATED, Set.of(
-                    TransportOrderStatus.REJECTED
+                    TransportOrderStatus.ASSIGNED
             ),
             TransportOrderStatus.ASSIGNED, Set.of(
                     TransportOrderStatus.IN_TRANSIT
@@ -129,6 +129,9 @@ public class TransportOrderService {
         }
 
         Set<TransportOrderStatus> allowedTargets = VALID_TRANSITION.getOrDefault(currentOrderStatus, Set.of());
+        if(newStatus == TransportOrderStatus.ASSIGNED && transportOrder.getVehicle() == null) {
+            throw new TransportException("A vehicle must be assigned before moving the transport order to ASSIGNED.");
+        }
         if(!allowedTargets.contains(newStatus)) {
             throw new TransportException("Cannot transition transport order from " + currentOrderStatus + " to " + newStatus);
         }
