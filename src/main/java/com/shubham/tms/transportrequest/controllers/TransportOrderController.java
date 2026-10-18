@@ -6,6 +6,7 @@ import com.shubham.tms.transportrequest.dto.TransportOrderStatusUpdateDto;
 import com.shubham.tms.transportrequest.dto.VehicleAssignmentRequestDto;
 import com.shubham.tms.transportrequest.entity.TransportOrder;
 import com.shubham.tms.transportrequest.enums.SortDirection;
+import com.shubham.tms.transportrequest.enums.TransportOrderStatus;
 import com.shubham.tms.transportrequest.service.TransportOrderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -45,9 +46,10 @@ public class TransportOrderController {
             @RequestParam(defaultValue = "0", required = false) @Min(value = 0, message = "Page index must be 0 or greater") int page,
             @RequestParam(defaultValue = "10", required = false) @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 100, message = "Limit must be less than or equal to 100") int limit,
             @RequestParam(required = false) SortDirection sortDirection,
-            @RequestParam(required = false) String sortBy
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false)TransportOrderStatus transportOrderStatus
             ) {
-        GetApiResponseDto<TransportOrderResponseDto> transportOrderResponseList = transportOrderService.getAllTransportOrders(page, limit, sortDirection, sortBy);
+        GetApiResponseDto<TransportOrderResponseDto> transportOrderResponseList = transportOrderService.getAllTransportOrders(page, limit, sortDirection, sortBy, transportOrderStatus);
         return ResponseEntity.ok()
                 .body(transportOrderResponseList);
     }
