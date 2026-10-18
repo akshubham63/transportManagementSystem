@@ -181,7 +181,7 @@ public class TransportOrderService {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if(status != null) {
-                predicates.add(criteriaBuilder.equal(root.get("transportOrderStatus "), status));
+                predicates.add(criteriaBuilder.equal(root.get("transportOrderStatus"), status));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
