@@ -3,6 +3,7 @@ package com.shubham.tms.transportrequest.controllers;
 import com.shubham.tms.transportrequest.dto.GetApiResponseDto;
 import com.shubham.tms.transportrequest.dto.TransportOrderResponseDto;
 import com.shubham.tms.transportrequest.dto.TransportOrderStatusUpdateDto;
+import com.shubham.tms.transportrequest.dto.VehicleAssignmentRequestDto;
 import com.shubham.tms.transportrequest.entity.TransportOrder;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.service.TransportOrderService;
@@ -57,6 +58,15 @@ public class TransportOrderController {
             @Valid @RequestBody TransportOrderStatusUpdateDto transportOrderStatusUpdateDto
     ) {
         TransportOrderResponseDto transportOrderResponseDto = transportOrderService.updateTransportOrderStatus(transportOrderId, transportOrderStatusUpdateDto);
+        return ResponseEntity.ok(transportOrderResponseDto);
+    }
+
+    @PatchMapping("/api/transport-orders/{id}/assignment")
+    public ResponseEntity<TransportOrderResponseDto> assignVehicleToTransportOrder(
+            @PathVariable("id") UUID transportOrderId,
+            @Valid @RequestBody VehicleAssignmentRequestDto vehicleAssignmentRequestDto
+            ) {
+        TransportOrderResponseDto transportOrderResponseDto = transportOrderService.updateTransportOrderVehicleAssignment(transportOrderId, vehicleAssignmentRequestDto);
         return ResponseEntity.ok(transportOrderResponseDto);
     }
 }

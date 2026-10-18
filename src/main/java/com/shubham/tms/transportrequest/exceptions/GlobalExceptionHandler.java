@@ -96,6 +96,13 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponseDto(status, message, request.getRequestURI()));
     }
 
+    @ExceptionHandler(VehicleNotFoundException.class)
+    public ResponseEntity<ApiErrorResponseDto> handleVehicleNotFound (VehicleNotFoundException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status)
+                .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
+    }
+
     private boolean isInvalidTransportRequestStatus(Throwable ex) {
         Throwable cause = ex;
 
