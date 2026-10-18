@@ -14,10 +14,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FleetService {
     public final FleetRepository fleetRepository;
+    private final Set<String> ALLOWED_SORT_BY_FIELDS = Set.of("createdAt", "name");
 
     public FleetService(
             FleetRepository fleetRepository
@@ -39,9 +41,18 @@ public class FleetService {
 
     public GetApiResponseDto<VehicleResponseDto> getAllFleets(
             int page, int limit, String sortBy, SortDirection sortDirection) {
+        String finalSortBy;
+        if(sortBy == null) {
+            finalSortBy = "createdAt";
+        } else if (ALLOWED_SORT_BY_FIELDS.contains(sortBy)) {
+            finalSortBy = sortBy;
+        } else {
+            throw new IllegalArgumentException("Invalid sort field: '" + sortBy +
+                    "'. Allowed fields are: " + ALLOWED_SORT_BY_FIELDS);
+        }
         Sort sort = Sort.by(
                 sortDirection != null && sortDirection.equals(SortDirection.DESC) ? Sort.Direction.DESC : Sort.Direction.ASC,
-                sortBy
+                finalSortBy
         );
         Pageable pageable = PageRequest.of(page, limit, sort);
         Page<Vehicle> vehicles = fleetRepository.findAll(pageable);

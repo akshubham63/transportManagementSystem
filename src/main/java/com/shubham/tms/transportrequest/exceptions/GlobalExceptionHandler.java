@@ -103,6 +103,14 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler(DuplicateVehicleNameException.class)
+    public ResponseEntity<ApiErrorResponseDto> handleVehicleNotFound (DuplicateVehicleNameException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        return ResponseEntity.status(status)
+                .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
+    }
+
+
     private boolean isInvalidTransportRequestStatus(Throwable ex) {
         Throwable cause = ex;
 
