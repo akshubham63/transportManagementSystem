@@ -11,7 +11,7 @@ import com.shubham.tms.transportrequest.dto.TransportOrderResponseDto;
 import com.shubham.tms.transportrequest.entity.TransportOrder;
 import com.shubham.tms.transportrequest.entity.TransportRequest;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
-import com.shubham.tms.transportrequest.repository.FleetRespository;
+import com.shubham.tms.transportrequest.repository.FleetRepository;
 import com.shubham.tms.transportrequest.repository.TransportOrderRepository;
 import com.shubham.tms.transportrequest.repository.TransportRequestRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,7 +27,7 @@ import java.util.*;
 public class TransportOrderService {
     public final TransportOrderRepository transportOrderRepository;
     public final TransportRequestRepository transportRequestRepository;
-    public final FleetRespository fleetRespository;
+    public final FleetRepository fleetRepository;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "createdAt"
     );
@@ -46,11 +46,11 @@ public class TransportOrderService {
     public TransportOrderService(
             TransportOrderRepository transportOrderRepository,
             TransportRequestRepository transportRequestRepository,
-            FleetRespository fleetRespository
+            FleetRepository fleetRepository
     ) {
         this.transportOrderRepository = transportOrderRepository;
         this.transportRequestRepository = transportRequestRepository;
-        this.fleetRespository = fleetRespository;
+        this.fleetRepository = fleetRepository;
     }
 
     public TransportOrder createTransportOrder(UUID transportRequestId) {
@@ -144,11 +144,11 @@ public class TransportOrderService {
         TransportOrder transportOrder = transportOrderRepository.findById(transportOrderId)
                 .orElseThrow(() -> new TransportOrderNotFoundException("Transport order with id: " + transportOrderId + " not found"));
         if(transportOrder.getTransportOrderStatus().equals(TransportOrderStatus.CREATED)) {
-            Optional<Vehicle> vehicle = fleetRespository.findByName(vehicleAssignmentRequestDto.getName());
+            Optional<Vehicle> vehicle = fleetRepository.findByName(vehicleAssignmentRequestDto.getName());
             if (vehicle.isEmpty()) {
                 throw new VehicleNotFoundException("Vehicle with name: " + vehicleAssignmentRequestDto.getName() + " not found");
             } else {
-                transportOrder.setVehicle(vehicle.get());
+                transportOrder.setVehicleId(vehicle.get().getId());
                 transportOrder.setTransportOrderStatus(TransportOrderStatus.ASSIGNED);
                 TransportOrder updatedTransportOrder = transportOrderRepository.save(transportOrder);
                 return TransportOrderResponseDto.fromEntity(updatedTransportOrder);

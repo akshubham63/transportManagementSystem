@@ -7,7 +7,7 @@ import com.shubham.tms.transportrequest.entity.Vehicle;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import com.shubham.tms.transportrequest.repository.FleetRespository;
+import com.shubham.tms.transportrequest.repository.FleetRepository;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
@@ -16,12 +16,12 @@ import java.util.List;
 
 @Service
 public class FleetService {
-    public final FleetRespository fleetRespository;
+    public final FleetRepository fleetRepository;
 
     public FleetService(
-            FleetRespository fleetRespository
+            FleetRepository fleetRepository
     ) {
-        this.fleetRespository = fleetRespository;
+        this.fleetRepository = fleetRepository;
     }
 
     public VehicleResponseDto createFleet(VehicleRequestDto vehicleRequestDto) {
@@ -29,7 +29,7 @@ public class FleetService {
                 .name(vehicleRequestDto.getName())
                 .fleetTypeEnum(vehicleRequestDto.getFleetTypeEnum())
                 .build();
-        Vehicle savedVehicle = fleetRespository.save(vehicle);
+        Vehicle savedVehicle = fleetRepository.save(vehicle);
         return VehicleResponseDto.fromEntity(savedVehicle);
     }
 
@@ -40,7 +40,7 @@ public class FleetService {
                 sortBy
         );
         Pageable pageable = PageRequest.of(page, limit, sort);
-        Page<Vehicle> vehicles = fleetRespository.findAll(pageable);
+        Page<Vehicle> vehicles = fleetRepository.findAll(pageable);
         List<VehicleResponseDto> vehicleResponseDtoList = vehicles.stream()
                 .map(VehicleResponseDto::fromEntity)
                 .toList();

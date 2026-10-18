@@ -18,7 +18,7 @@ import java.util.UUID;
 @Table(
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_transport_order_request",
-                columnNames = {"transport_request_id", "fleet_id"}
+                columnNames = "transport_request_id"
         )
 )
 public class TransportOrder {
@@ -43,13 +43,11 @@ public class TransportOrder {
 
     private Date updatedAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "fleet_id",
-            nullable = true,
-            foreignKey = @ForeignKey(name = "fk_transport_order_fleet")
+    @Column(
+            nullable = false,
+            updatable = false
     )
-    private Vehicle vehicle;
+    private UUID vehicleId;
 
     @PrePersist
     protected void onCreated() {
