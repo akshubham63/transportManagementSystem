@@ -18,10 +18,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
 import java.util.*;
+import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class TransportOrderService {
@@ -87,7 +89,7 @@ public class TransportOrderService {
     }
 
     public GetApiResponseDto<TransportOrderResponseDto> getAllTransportOrders(
-            int page, int limit, SortDirection sortDirection, String sortBy
+            int page, int limit, SortDirection sortDirection, String sortBy, TransportOrderStatus transportOrderStatus
     ) {
         String finalSortBy;
         if(sortBy == null) {
@@ -102,8 +104,9 @@ public class TransportOrderService {
                 sortDirection != null && sortDirection.equals(SortDirection.DESC)? Sort.Direction.DESC : Sort.Direction.ASC,
                 finalSortBy
         );
+        Specification<TransportOrder> spec = buildSpecification(transportOrderStatus);
         Pageable pageable = PageRequest.of(page, limit, sort);
-        Page<TransportOrder> transportOrderList = transportOrderRepository.findAll(pageable);
+        Page<TransportOrder> transportOrderList = transportOrderRepository.findAll(spec, pageable);
         List<TransportOrderResponseDto> transportOrderResponseDtoList = transportOrderList.stream()
                 .map(TransportOrderResponseDto::fromEntity)
                 .toList();
@@ -172,5 +175,15 @@ public class TransportOrderService {
         }
 
         return false;
+    }
+
+    private Specification<TransportOrder> buildSpecification(TransportOrderStatus status) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(status != null) {
+                predicates.add(criteriaBuilder.equal(root.get("transportOrderStatus "), status));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
     }
 }

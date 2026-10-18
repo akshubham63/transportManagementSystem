@@ -6,6 +6,8 @@ import com.shubham.tms.transportrequest.dto.VehicleResponseDto;
 import com.shubham.tms.transportrequest.enums.SortDirection;
 import com.shubham.tms.transportrequest.service.FleetService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +35,10 @@ public class FleetManagerController {
 
     @GetMapping
     public ResponseEntity<GetApiResponseDto<VehicleResponseDto>> getAllVehicles(
-            @RequestParam int page,
-            @RequestParam int limit,
-            @RequestParam String sortBy,
-            @RequestParam SortDirection sortDirection
+            @RequestParam(defaultValue = "0", required = false) @Min(value = 0, message = "Page index must be 0 or greater") int page,
+            @RequestParam(defaultValue = "10", required = false) @Min(value = 1, message = "Limit must be 1 or greater") @Max(value = 100, message = "Limit must be less than or equal to 100") int limit,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) SortDirection sortDirection
             ) {
         GetApiResponseDto<VehicleResponseDto> allFleets = fleetService.getAllFleets(page, limit, sortBy, sortDirection);
         return ResponseEntity.ok(allFleets);
