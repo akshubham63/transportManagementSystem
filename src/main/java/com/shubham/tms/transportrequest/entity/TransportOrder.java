@@ -46,7 +46,8 @@ public class TransportOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "vehicle_id",
-            foreignKey = @ForeignKey(name = "fk_transport_order_vehicle")
+            foreignKey = @ForeignKey(name = "fk_transport_order_vehicle"),
+            nullable = true
     )
     private Vehicle vehicle;
 
