@@ -26,7 +26,7 @@ public class TransportOrderResponseDto {
                 .requestNumber(transportOrder.getTransportRequest().getRequestNumber())
                 .createdAt(transportOrder.getCreatedAt())
                 .transportOrderStatus(transportOrder.getTransportOrderStatus())
-                .vehicleName(transportOrder.getVehicle().getName())
+                .vehicleName(transportOrder.getVehicle() != null ? transportOrder.getVehicle().getName() : null)
                 .build();
     }
 }
