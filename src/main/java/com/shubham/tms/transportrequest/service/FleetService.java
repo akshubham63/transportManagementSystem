@@ -43,7 +43,7 @@ public class FleetService {
             int page, int limit, String sortBy, SortDirection sortDirection) {
         String finalSortBy;
         if(sortBy == null) {
-            finalSortBy = "createdAt";
+            finalSortBy = "name";
         } else if (ALLOWED_SORT_BY_FIELDS.contains(sortBy)) {
             finalSortBy = sortBy;
         } else {
