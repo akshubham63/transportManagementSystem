@@ -17,6 +17,7 @@ public class TransportOrderResponseDto {
     private String requestNumber;
     private Date createdAt;
     private TransportOrderStatus transportOrderStatus;
+    private String vehicleName;
 
     public static TransportOrderResponseDto fromEntity(TransportOrder transportOrder){
         return TransportOrderResponseDto.builder()
@@ -25,6 +26,7 @@ public class TransportOrderResponseDto {
                 .requestNumber(transportOrder.getTransportRequest().getRequestNumber())
                 .createdAt(transportOrder.getCreatedAt())
                 .transportOrderStatus(transportOrder.getTransportOrderStatus())
+                .vehicleName(transportOrder.getVehicle() != null ? transportOrder.getVehicle().getName() : null)
                 .build();
     }
 }
