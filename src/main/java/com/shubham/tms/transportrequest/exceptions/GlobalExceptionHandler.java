@@ -110,6 +110,13 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiErrorResponseDto> handleUserNotFoundException (UserNotFoundException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status)
+                .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
+    }
+
 
     private boolean isInvalidTransportRequestStatus(Throwable ex) {
         Throwable cause = ex;
