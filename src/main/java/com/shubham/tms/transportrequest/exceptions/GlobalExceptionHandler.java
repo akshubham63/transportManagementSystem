@@ -124,7 +124,7 @@ public class GlobalExceptionHandler {
             io.jsonwebtoken.JwtException.class,
             com.shubham.tms.transportrequest.exceptions.InvalidTokenArgumentException.class
     })
-    public ResponseEntity<ApiErrorResponseDto> handleJwtExceptions (io.jsonwebtoken.JwtException ex, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDto> handleJwtExceptions (RuntimeException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
         String message = switch (ex) {
             case ExpiredJwtException expiredJwtException -> "Authentication failed: The token has expired.";
