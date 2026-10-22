@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
@@ -24,13 +25,16 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public final JwtService jwtService;
     public final UserDetailsService userDetailsService;
+    public final HandlerExceptionResolver resolver;
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
-            UserDetailsService userDetailsService
+            UserDetailsService userDetailsService,
+            HandlerExceptionResolver resolver
     ) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.resolver = resolver;
     }
 
     @Override
@@ -65,22 +69,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
             }
-            filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException | MalformedJwtException | IllegalArgumentException ex) {
-            handleAuthenticationException(response, "Invalid, expired, or malformed JWT token.");
+        } catch (Exception ex) {
+            resolver.resolveException(request, response, null, ex);
         }
-    }
-
-    private void handleAuthenticationException(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        // Consistent error structure for protected request failures
-        String jsonResponseBody = String.format(
-                "{\"status\": 401, \"error\": \"Unauthorized\", \"message\": \"%s\"}",
-                message
-        );
-
-        response.getWriter().write(jsonResponseBody);
+        filterChain.doFilter(request, response);
     }
 }
