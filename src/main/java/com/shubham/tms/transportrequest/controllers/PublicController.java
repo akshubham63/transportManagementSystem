@@ -41,12 +41,6 @@ public class PublicController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/get-user/{username}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable("username") String userName) {
-        UserResponseDto user = userService.getUserByUserName(userName);
-        return ResponseEntity.ok().body(user);
-    }
-
     @PostMapping("/user/login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody AuthRequestDto authRequestDto) {
         authenticationManager.authenticate(

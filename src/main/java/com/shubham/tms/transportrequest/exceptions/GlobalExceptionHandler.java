@@ -117,7 +117,6 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
     }
 
-
     private boolean isInvalidTransportRequestStatus(Throwable ex) {
         Throwable cause = ex;
 
