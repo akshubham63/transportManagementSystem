@@ -120,7 +120,10 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
     }
 
-    @ExceptionHandler(io.jsonwebtoken.JwtException.class)
+    @ExceptionHandler({
+            io.jsonwebtoken.JwtException.class,
+            com.shubham.tms.transportrequest.exceptions.InvalidTokenArgumentException.class
+    })
     public ResponseEntity<ApiErrorResponseDto> handleJwtExceptions (io.jsonwebtoken.JwtException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
         String message = switch (ex) {
