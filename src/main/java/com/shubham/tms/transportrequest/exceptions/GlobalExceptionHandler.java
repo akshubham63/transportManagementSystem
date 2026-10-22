@@ -3,6 +3,8 @@ package com.shubham.tms.transportrequest.exceptions;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.shubham.tms.transportrequest.dto.ApiErrorResponseDto;
 import com.shubham.tms.transportrequest.enums.TransportRequestStatus;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -110,6 +113,33 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiErrorResponseDto> handleUserNotFoundException (UserNotFoundException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status)
+                .body(new ApiErrorResponseDto(status, ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler({
+            io.jsonwebtoken.JwtException.class,
+            com.shubham.tms.transportrequest.exceptions.InvalidTokenArgumentException.class
+    })
+    public ResponseEntity<ApiErrorResponseDto> handleJwtExceptions (RuntimeException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        String message = switch (ex) {
+            case ExpiredJwtException expiredJwtException -> "Authentication failed: The token has expired.";
+            case io.jsonwebtoken.security.SignatureException signatureException ->
+                    "Authentication failed: Token signature validation failed.";
+            case MalformedJwtException malformedJwtException ->
+                    "Authentication failed: The token format is invalid or malformed.";
+            case io.jsonwebtoken.UnsupportedJwtException unsupportedJwtException ->
+                    "Authentication failed: The token type is unsupported.";
+            case null, default -> "Authentication failed: Invalid authentication token structural attributes.";
+        };
+
+        return ResponseEntity.status(status)
+                .body(new ApiErrorResponseDto(status, message, request.getRequestURI()));
+    }
 
     private boolean isInvalidTransportRequestStatus(Throwable ex) {
         Throwable cause = ex;
