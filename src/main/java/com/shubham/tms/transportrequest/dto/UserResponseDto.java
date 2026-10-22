@@ -12,14 +12,12 @@ public class UserResponseDto {
     private UUID id;
     private String email;
     private String username;
-    private String password;
 
     public static UserResponseDto fromEntity(User user) {
         return UserResponseDto.builder()
                 .id(user.getId())
                 .email(user.getEmailId())
                 .username(user.getUsername())
-                .password(user.getUsername())
                 .build();
     }
 }

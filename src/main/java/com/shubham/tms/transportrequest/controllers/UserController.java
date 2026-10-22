@@ -23,8 +23,8 @@ public class UserController {
         this.userService = userService;
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") UUID userId) {
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         userService.deleteUser(username);
